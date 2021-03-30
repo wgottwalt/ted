@@ -2,6 +2,14 @@ CMAKE_MINIMUM_REQUIRED  (VERSION 3.0)
 PROJECT                 (TEd LANGUAGES CXX)
 
 # packages
+INCLUDE                 (FetchContent)
+
+FetchContent_Declare    (nana GIT_REPOSITORY https://github.com/wgottwalt/nana.git GIT_TAG devel)
+FetchContent_GetProperties (nana)
+IF                      (NOT nana_POPULATED)
+    FetchContent_Populate (nana)
+    ADD_SUBDIRECTORY    (${nana_SOURCE_DIR} ${nana_BINARY_DIR})
+ENDIF                   ()
 
 # includes and paths/directories
 SET                     (CMAKE_INCLUDE_CURRENT_DIR on)
