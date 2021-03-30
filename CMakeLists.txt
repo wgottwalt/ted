@@ -1,19 +1,14 @@
-CMAKE_MINIMUM_REQUIRED  (VERSION 3.0)
+CMAKE_MINIMUM_REQUIRED  (VERSION 3.14)
 PROJECT                 (TEd LANGUAGES CXX)
 
 # packages
 INCLUDE                 (FetchContent)
 
 FetchContent_Declare    (nana GIT_REPOSITORY https://github.com/wgottwalt/nana.git GIT_TAG devel)
-FetchContent_GetProperties (nana)
-IF                      (NOT nana_POPULATED)
-    FetchContent_Populate (nana)
-    ADD_SUBDIRECTORY    (${nana_SOURCE_DIR} ${nana_BINARY_DIR})
-ENDIF                   ()
+FetchContent_MakeAvailable (nana)
 
 # includes and paths/directories
 SET                     (CMAKE_INCLUDE_CURRENT_DIR on)
-SET                     (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 INCLUDE_DIRECTORIES     (${PROJECT_SOURCE_DIR}/sources)
 SET                     (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 SET                     (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugin)
