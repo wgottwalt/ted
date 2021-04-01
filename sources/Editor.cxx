@@ -67,13 +67,23 @@ void Editor::setupMenu()
     });
     _menu.at(0).append("Save as...");
     _menu.at(0).append_splitter();
-    _menu.at(0).append("Quit");
+    _menu.at(0).append("Quit", [this](nana::menu::item_proxy &)
+    {
+        nana::API::exit();
+    });
 
     _menu.push_back("&Edit");
     _menu.at(1).append("Undo");
     _menu.at(1).append("Redo");
+    _menu.at(1).append_splitter();
+    _menu.at(1).append("Cut");
+    _menu.at(1).append("Copy");
+    _menu.at(1).append("Paste");
+    _menu.at(1).append("Delete");
+    _menu.at(1).append_splitter();
+    _menu.at(1).append("Select all");
 
-    _menu.push_back("&Config");
+    _menu.push_back("&Configuration");
     _menu.at(2).append("Line Wrap", [this](nana::menu::item_proxy &ip)
     {
         _text.line_wrapped(ip.checked());
@@ -81,6 +91,8 @@ void Editor::setupMenu()
     _menu.at(2).check_style(0, nana::menu::checks::highlight);
 
     _menu.push_back("&About");
+    _menu.at(3).append("About Ted...");
+    _menu.at(3).append("Anout Nana...");
 }
 
 void Editor::setupEditor()
