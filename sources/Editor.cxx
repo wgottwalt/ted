@@ -16,6 +16,9 @@ Editor::Editor(const std::string &name, const std::string &filename)
         if (!isSaveNeeded(_filename))
             arg.cancel = true;
     });
+
+    if (_filename != DefFilename)
+        _text.load(_filename);
 }
 
 Editor::~Editor() noexcept

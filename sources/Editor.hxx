@@ -7,8 +7,11 @@
 
 class Editor : public nana::form {
 public:
+    //--- public constants and types ---
+    static constexpr char DefFilename[] = "noname.txt";
+
     //--- public constructors ---
-    Editor(const std::string &name, const std::string &filename = "noname.txt");
+    Editor(const std::string &name, const std::string &filename = DefFilename);
     Editor(const Editor &rhs) = delete;
     Editor(Editor &&rhs) = delete;
     ~Editor() noexcept;
