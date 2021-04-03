@@ -1,10 +1,11 @@
 #include <nana/gui/filebox.hpp>
+#include <nana/gui/msgbox.hpp>
 #include "Editor.hxx"
 
 //--- public constructors ---
 
 Editor::Editor(const std::string &name, const std::string &filename)
-: form(), _widget(*this), _menu(*this), _text(*this), _filename(filename)
+: form(), _widget(*this), _menu(*this), _text(*this)
 {
     caption(name);
     setupMenu();
@@ -13,25 +14,15 @@ Editor::Editor(const std::string &name, const std::string &filename)
 
     events().unload([this](const nana::arg_unload &arg)
     {
-        if (!isSaveNeeded(_filename))
+        if (!saveIfEdited(false))
             arg.cancel = true;
     });
 
-    if (_filename != DefFilename)
-        _text.load(_filename);
+    if (filename != DefFilename)
+        _text.load(filename);
 }
 
 Editor::~Editor() noexcept
-{
-}
-
-//--- public methods ---
-
-bool Editor::save(const std::string &filename)
-{
-}
-
-bool Editor::load(const std::string &filename)
 {
 }
 
@@ -42,23 +33,23 @@ void Editor::setupMenu()
     _menu.push_back("&File");
     _menu.at(0).append("New", [this](nana::menu::item_proxy &)
     {
-        if (isSaveNeeded(_filename))
+        if (saveIfEdited())
             _text.reset();
     });
     _menu.at(0).append_splitter();
     _menu.at(0).append("Open", [this](nana::menu::item_proxy &)
     {
-        if (isSaveNeeded(_filename))
+        if (saveIfEdited())
         {
-            auto ifile = fileDialog(true);
+            std::string ifile = fileDialog(true);
 
-            if (ifile.size())
+            if (!ifile.empty())
                 _text.load(ifile.data());
         }
     });
     _menu.at(0).append("Save", [this](nana::menu::item_proxy &)
     {
-        auto ofile = _text.filename();
+        std::string ofile = _text.filename();
 
         if (ofile.empty())
         {
@@ -68,11 +59,18 @@ void Editor::setupMenu()
         }
         _text.store(ofile);
     });
-    _menu.at(0).append("Save as...");
+    _menu.at(0).append("Save as...", [this](nana::menu::item_proxy &)
+    {
+        std::string ofile = fileDialog(false);
+
+        if (!ofile.empty())
+            _text.store(ofile);
+    });
     _menu.at(0).append_splitter();
     _menu.at(0).append("Quit", [this](nana::menu::item_proxy &)
     {
-        nana::API::exit();
+        if (saveIfEdited())
+            nana::API::exit();
     });
 
     _menu.push_back("&Edit");
@@ -104,7 +102,7 @@ void Editor::setupEditor()
     _text.enable_dropfiles(true);
     _text.events().mouse_dropfiles([this](const nana::arg_dropfiles &arg)
     {
-        if (arg.files.size() && isSaveNeeded(_filename))
+        if (arg.files.size() && saveIfEdited())
             _text.load(arg.files.at(0));
     });
 
@@ -119,23 +117,55 @@ void Editor::setupUi()
     _widget.collocate();
 }
 
-bool Editor::isSaveNeeded(const std::string &filename)
+bool Editor::saveIfEdited(const bool force_requester)
 {
-    if (!_text.saved())
-        return save(filename);
+    if (force_requester || _text.edited())
+    {
+        nana::msgbox msg(*this, "Unsaved Changes Dialog", nana::msgbox::button_t::yes_no_cancel);
 
-    return _text.saved();
+        msg << "Do you want to save changes?";
+
+        switch (msg.show())
+        {
+            case nana::msgbox::pick_yes:
+            {
+                std::string ofile = _text.filename();
+
+                if (ofile.empty())
+                {
+                    ofile = fileDialog(false);
+
+                    if (ofile.empty())
+                        break;
+                }
+                _text.store(ofile);
+
+                break;
+            }
+            case nana::msgbox::pick_no:
+                break;
+            case nana::msgbox::pick_cancel:
+            default:
+                return false;
+        }
+    }
+
+    return true;
 }
 
-std::string Editor::fileDialog(const bool is_open) const
+std::string Editor::fileDialog(const bool is_open_dialog) const
 {
-    nana::filebox dialog(*this, is_open);
+    nana::filebox dialog(*this, is_open_dialog);
 
-    dialog.add_filter("Readme", "*.md");
-    dialog.add_filter("Text", "*.txt");
-    dialog.add_filter("All Files", "*.*");
+    dialog.add_filter("Text (*.txt)", "*.txt");
+    dialog.add_filter("Readme (*.md)", "*.md");
+    dialog.add_filter("All Files (*.*)", "*.*");
 
-    dialog.show();
+    if (!is_open_dialog)
+        dialog.init_file(DefFilename);
 
-    return dialog.path();
+    if (auto files = dialog.show(); !files.empty())
+        return files.at(0);
+
+    return std::string();
 }

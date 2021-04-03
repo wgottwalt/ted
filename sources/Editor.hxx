@@ -20,22 +20,17 @@ public:
     Editor &operator=(const Editor &rhs) = delete;
     Editor &operator=(Editor &&rhs) = delete;
 
-    //--- public methods ---
-    bool save(const std::string &filename = "");
-    bool load(const std::string &filename = "");
-
 protected:
     //--- protected methods ---
     void setupMenu();
     void setupEditor();
     void setupUi();
-    bool isSaveNeeded(const std::string &filename);
-    std::string fileDialog(const bool is_open) const;
+    bool saveIfEdited(const bool force_requester = false);
+    std::string fileDialog(const bool is_open_dialog = true) const;
 
 private:
     //--- private properties ---
     nana::place _widget;
     nana::menubar _menu;
     nana::textbox _text;
-    std::string _filename;
 };
