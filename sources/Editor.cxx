@@ -5,7 +5,7 @@
 //--- public constructors ---
 
 Editor::Editor(const std::string &name, const std::string &filename)
-: form(), _widget(*this), _menu(*this), _text(*this)
+: form(), _widget(*this), _menu(*this), _linenum(*this), _text(*this)
 {
     caption(name);
     setupMenu();
@@ -111,9 +111,10 @@ void Editor::setupEditor()
 
 void Editor::setupUi()
 {
-    _widget.div("vert<menubar weight=26><textbox>");
-    _widget.field("menubar") << _menu;
-    _widget.field("textbox") << _text;
+    _widget.div("<><weight=100% vertical <mb weight=26> <gap=1 <ln weight=5> <ed> > ><>");
+    _widget.field("mb") << _menu;
+    _widget.field("ln") << _linenum;
+    _widget.field("ed") << _text;
     _widget.collocate();
 }
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <nana/gui/widgets/form.hpp>
 #include <nana/gui/widgets/menubar.hpp>
+#include <nana/gui/widgets/panel.hpp>
 #include <nana/gui/widgets/textbox.hpp>
 
 class Editor : public nana::form {
@@ -32,5 +33,6 @@ private:
     //--- private properties ---
     nana::place _widget;
     nana::menubar _menu;
+    nana::panel<true> _linenum;
     nana::textbox _text;
 };
