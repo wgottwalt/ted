@@ -1,16 +1,18 @@
+#include <vector>
 #include <nana/gui/filebox.hpp>
+#include <nana/gui/drawing.hpp>
 #include <nana/gui/msgbox.hpp>
 #include "Editor.hxx"
 
 //--- public constructors ---
 
 Editor::Editor(const std::string &name, const std::string &filename)
-: form(), _widget(*this), _menu(*this), _linenum(*this), _text(*this)
+: form(), _layout(*this), _menu(*this), _linenum(*this), _text(*this)
 {
     caption(name);
+    setupUi();
     setupMenu();
     setupEditor();
-    setupUi();
 
     events().unload([this](const nana::arg_unload &arg)
     {
@@ -100,22 +102,53 @@ void Editor::setupEditor()
 {
     _text.borderless(true);
     _text.enable_dropfiles(true);
+
+    nana::drawing(_linenum).draw([&](nana::paint::graphics &gfx)
+    {
+        const int32_t pixels_per_line = _text.line_pixels();
+
+        if (pixels_per_line > 0)
+        {
+            const auto positions = _text.text_position();
+            const int32_t right = gfx.width() - 5;
+            int32_t top = _text.text_area().y - _text.content_origin().y % pixels_per_line;
+
+            for (auto &pos : positions)
+            {
+                const auto num = std::to_wstring(pos.y + 1);
+                const int32_t pxls = gfx.text_extent_size(num).width;
+
+                if ((pxls + 5) > static_cast<int32_t>(gfx.width()))
+                {
+                    _layout.modify("ln", ("weight=" + std::to_string(pxls + 10)).c_str());
+                    collocate();
+
+                    return;
+                }
+
+                gfx.string({right - pxls, top }, num);
+                top += pixels_per_line;
+            }
+        }
+    });
+
     _text.events().mouse_dropfiles([this](const nana::arg_dropfiles &arg)
     {
         if (arg.files.size() && saveIfEdited())
             _text.load(arg.files.at(0));
     });
+    _text.events().text_exposed([this]{ nana::API::refresh_window(_linenum); });
 
     nana::API::effects_edge_nimbus(_text, nana::effects::edge_nimbus::none);
 }
 
 void Editor::setupUi()
 {
-    _widget.div("<><weight=100% vertical <mb weight=26> <gap=1 <ln weight=5> <ed> > ><>");
-    _widget.field("mb") << _menu;
-    _widget.field("ln") << _linenum;
-    _widget.field("ed") << _text;
-    _widget.collocate();
+    _layout.div("<><weight=100% vertical <mb weight=26> <gap=1 <ln weight=12> <ed> > ><>");
+    _layout.field("mb") << _menu;
+    _layout.field("ln") << _linenum;
+    _layout.field("ed") << _text;
+    _layout.collocate();
 }
 
 bool Editor::saveIfEdited(const bool force_requester)

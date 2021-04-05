@@ -31,7 +31,7 @@ protected:
 
 private:
     //--- private properties ---
-    nana::place _widget;
+    nana::place _layout;
     nana::menubar _menu;
     nana::panel<true> _linenum;
     nana::textbox _text;
