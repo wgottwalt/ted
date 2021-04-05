@@ -92,6 +92,10 @@ void Editor::setupMenu()
         _text.line_wrapped(ip.checked());
     });
     _menu.at(2).check_style(0, nana::menu::checks::highlight);
+    _menu.at(2).append("Line Numbers", [this](nana::menu::item_proxy &ip)
+    {
+    });
+    _menu.at(2).check_style(1, nana::menu::checks::highlight);
 
     _menu.push_back("&About");
     _menu.at(3).append("About Ted...");
