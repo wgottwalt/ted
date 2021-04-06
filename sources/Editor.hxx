@@ -10,6 +10,7 @@ class Editor : public nana::form {
 public:
     //--- public constants and types ---
     static constexpr char DefFilename[] = "noname.txt";
+    static const int32_t DefSpace = 5;
 
     //--- public constructors ---
     Editor(const std::string &name, const std::string &filename = DefFilename);
@@ -28,6 +29,7 @@ protected:
     void setupUi();
     bool saveIfEdited(const bool force_requester = false);
     std::string fileDialog(const bool is_open_dialog = true) const;
+    void redrawLineNumPanel(nana::paint::graphics &gfx);
 
 private:
     //--- private properties ---

@@ -107,34 +107,8 @@ void Editor::setupEditor()
     _text.borderless(true);
     _text.enable_dropfiles(true);
 
-    nana::drawing(_linenum).draw([&](nana::paint::graphics &gfx)
-    {
-        const int32_t pixels_per_line = _text.line_pixels();
-
-        if (pixels_per_line > 0)
-        {
-            const auto positions = _text.text_position();
-            const int32_t right = gfx.width() - 5;
-            int32_t top = _text.text_area().y - _text.content_origin().y % pixels_per_line;
-
-            for (auto &pos : positions)
-            {
-                const auto num = std::to_wstring(pos.y + 1);
-                const int32_t pxls = gfx.text_extent_size(num).width;
-
-                if ((pxls + 5) > static_cast<int32_t>(gfx.width()))
-                {
-                    _layout.modify("ln", ("weight=" + std::to_string(pxls + 10)).c_str());
-                    collocate();
-
-                    return;
-                }
-
-                gfx.string({right - pxls, top }, num);
-                top += pixels_per_line;
-            }
-        }
-    });
+    nana::API::effects_edge_nimbus(_text, nana::effects::edge_nimbus::none);
+    nana::drawing(_linenum).draw([&](nana::paint::graphics &gfx){ redrawLineNumPanel(gfx); });
 
     _text.events().mouse_dropfiles([this](const nana::arg_dropfiles &arg)
     {
@@ -142,8 +116,6 @@ void Editor::setupEditor()
             _text.load(arg.files.at(0));
     });
     _text.events().text_exposed([this]{ nana::API::refresh_window(_linenum); });
-
-    nana::API::effects_edge_nimbus(_text, nana::effects::edge_nimbus::none);
 }
 
 void Editor::setupUi()
@@ -209,4 +181,42 @@ std::string Editor::fileDialog(const bool is_open_dialog) const
         return files.at(0);
 
     return std::string();
+}
+
+void Editor::redrawLineNumPanel(nana::paint::graphics &gfx)
+{
+    const int32_t pixels_per_line = _text.line_pixels();
+    const int32_t right = gfx.width() - DefSpace;
+
+    if (pixels_per_line > 0)
+    {
+        const auto entries = _text.text_position();
+        uint32_t width = gfx.text_extent_size(std::to_wstring(entries.back().y)).width + DefSpace;
+        int32_t top = _text.text_area().y - _text.content_origin().y % pixels_per_line;
+
+        if ((width + DefSpace) != gfx.width())
+        {
+            _layout.modify("ln", ("weight=" + std::to_string(width + DefSpace)).c_str());
+            collocate();
+
+            return;
+        }
+
+        for (auto &entry : entries)
+        {
+            const std::wstring num = std::to_wstring(entry.y + 1);
+            const int32_t pixels = gfx.text_extent_size(num).width;
+
+            width = pixels + DefSpace;
+            gfx.string({right - pixels, top}, num);
+            top += pixels_per_line;
+        }
+    }
+    else
+    {
+        const uint32_t width = gfx.text_extent_size("0").width + DefSpace;
+
+        _layout.modify("ln", ("weight=" + std::to_string(width + DefSpace)).c_str());
+        collocate();
+    }
 }
