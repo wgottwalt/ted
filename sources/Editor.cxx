@@ -148,6 +148,9 @@ void Editor::setupEditor()
 
 void Editor::setupUi()
 {
+    size({640, 480});
+    nana::API::track_window_size(*this, {320,160}, false);
+
     _layout.div("<><weight=100% vertical <mb weight=26> <gap=1 <ln weight=12> <ed> > ><>");
     _layout.field("mb") << _menu;
     _layout.field("ln") << _linenum;
