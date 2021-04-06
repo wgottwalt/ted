@@ -92,9 +92,7 @@ void Editor::setupMenu()
         _text.line_wrapped(ip.checked());
     });
     _menu.at(2).check_style(0, nana::menu::checks::highlight);
-    _menu.at(2).append("Line Numbers", [this](nana::menu::item_proxy &ip)
-    {
-    });
+    _menu.at(2).append("Line Numbers");
     _menu.at(2).check_style(1, nana::menu::checks::highlight);
 
     _menu.push_back("&About");
@@ -123,7 +121,7 @@ void Editor::setupUi()
     size({640, 480});
     nana::API::track_window_size(*this, {320,160}, false);
 
-    _layout.div("<><weight=100% vertical <mb weight=26> <gap=1 <ln weight=12> <ed> > ><>");
+    _layout.div("<><weight=100% vertical <mb weight=26> <gap=1 <ln weight=1> <ed> > ><>");
     _layout.field("mb") << _menu;
     _layout.field("ln") << _linenum;
     _layout.field("ed") << _text;
@@ -185,12 +183,12 @@ std::string Editor::fileDialog(const bool is_open_dialog) const
 
 void Editor::redrawLineNumPanel(nana::paint::graphics &gfx)
 {
-    const int32_t pixels_per_line = _text.line_pixels();
     const int32_t right = gfx.width() - DefSpace;
+    const int32_t pixels_per_line = _text.line_pixels();
 
-    if (pixels_per_line > 0)
+    if ((pixels_per_line > 0) && _menu.at(2).checked(1))
     {
-        const auto entries = _text.text_position();
+        const auto &entries(_text.text_position());
         uint32_t width = gfx.text_extent_size(std::to_wstring(entries.back().y)).width + DefSpace;
         int32_t top = _text.text_area().y - _text.content_origin().y % pixels_per_line;
 
@@ -202,7 +200,7 @@ void Editor::redrawLineNumPanel(nana::paint::graphics &gfx)
             return;
         }
 
-        for (auto &entry : entries)
+        for (const auto &entry : entries)
         {
             const std::wstring num = std::to_wstring(entry.y + 1);
             const int32_t pixels = gfx.text_extent_size(num).width;
@@ -214,9 +212,10 @@ void Editor::redrawLineNumPanel(nana::paint::graphics &gfx)
     }
     else
     {
-        const uint32_t width = gfx.text_extent_size("0").width + DefSpace;
-
-        _layout.modify("ln", ("weight=" + std::to_string(width + DefSpace)).c_str());
-        collocate();
+        if (gfx.width() > 1)
+        {
+            _layout.modify("ln", "weight=1");
+            collocate();
+        }
     }
 }
