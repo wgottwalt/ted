@@ -2,19 +2,31 @@
 #include <nana/gui.hpp>
 #include "Editor.hxx"
 
-int32_t main(int32_t argc, char **argv)
+int32_t main(int32_t argc, char **argv) noexcept
 {
     Editor *ed = nullptr;
 
-    if (argc == 2)
-        ed = new Editor("TEd", argv[1]);
-    else
-        ed = new Editor("TEd");
+    try
+    {
+        if (argc == 2)
+            ed = new Editor("TEd", argv[1]);
+        else
+            ed = new Editor("TEd");
 
-    ed->show();
-    nana::exec();
+        ed->show();
+        nana::exec();
 
-    delete ed;
+        delete ed;
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << "error: " << e.what() << std::endl;
+
+        if (ed)
+            delete ed;
+
+        return 1;
+    }
 
     return 0;
 }

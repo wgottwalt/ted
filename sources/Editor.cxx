@@ -24,13 +24,9 @@ Editor::Editor(const std::string &name, const std::string &filename)
         _text.load(filename);
 }
 
-Editor::~Editor() noexcept
-{
-}
-
 //--- protected methods ---
 
-void Editor::setupMenu()
+void Editor::setupMenu() noexcept(false)
 {
     _menu.push_back("&File");
     _menu.at(0).append("New", [this](nana::menu::item_proxy &)
@@ -100,7 +96,7 @@ void Editor::setupMenu()
     _menu.at(3).append("Anout Nana...");
 }
 
-void Editor::setupEditor()
+void Editor::setupEditor() noexcept(false)
 {
     _text.borderless(true);
     _text.enable_dropfiles(true);
@@ -116,7 +112,7 @@ void Editor::setupEditor()
     _text.events().text_exposed([this]{ nana::API::refresh_window(_linenum); });
 }
 
-void Editor::setupUi()
+void Editor::setupUi() noexcept(false)
 {
     size({640, 480});
     nana::API::track_window_size(*this, {320,160}, false);
@@ -128,7 +124,7 @@ void Editor::setupUi()
     _layout.collocate();
 }
 
-bool Editor::saveIfEdited(const bool force_requester)
+bool Editor::saveIfEdited(const bool force_requester) noexcept(false)
 {
     if (force_requester || _text.edited())
     {
@@ -164,7 +160,7 @@ bool Editor::saveIfEdited(const bool force_requester)
     return true;
 }
 
-std::string Editor::fileDialog(const bool is_open_dialog) const
+std::string Editor::fileDialog(const bool is_open_dialog) const noexcept(false)
 {
     nana::filebox dialog(*this, is_open_dialog);
 
@@ -181,7 +177,7 @@ std::string Editor::fileDialog(const bool is_open_dialog) const
     return std::string();
 }
 
-void Editor::redrawLineNumPanel(nana::paint::graphics &gfx)
+void Editor::redrawLineNumPanel(nana::paint::graphics &gfx) noexcept(false)
 {
     const int32_t right = gfx.width() - DefSpace;
     const int32_t pixels_per_line = _text.line_pixels();

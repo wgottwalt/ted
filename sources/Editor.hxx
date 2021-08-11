@@ -13,10 +13,10 @@ public:
     static const int32_t DefSpace = 5;
 
     //--- public constructors ---
-    Editor(const std::string &name, const std::string &filename = DefFilename);
-    Editor(const Editor &rhs) = delete;
-    Editor(Editor &&rhs) = delete;
-    ~Editor() noexcept;
+    Editor(const std::string &name, const std::string &filename = DefFilename) noexcept(false);
+    Editor(const Editor &rhs) noexcept(false) = delete;
+    Editor(Editor &&rhs) noexcept = delete;
+    ~Editor() noexcept = default;
 
     //--- public operators ---
     Editor &operator=(const Editor &rhs) = delete;
@@ -24,12 +24,12 @@ public:
 
 protected:
     //--- protected methods ---
-    void setupMenu();
-    void setupEditor();
-    void setupUi();
-    bool saveIfEdited(const bool force_requester = false);
-    std::string fileDialog(const bool is_open_dialog = true) const;
-    void redrawLineNumPanel(nana::paint::graphics &gfx);
+    void setupMenu() noexcept(false);
+    void setupEditor() noexcept(false);
+    void setupUi() noexcept(false);
+    bool saveIfEdited(const bool force_requester = false) noexcept(false);
+    std::string fileDialog(const bool is_open_dialog = true) const noexcept(false);
+    void redrawLineNumPanel(nana::paint::graphics &gfx) noexcept(false);
 
 private:
     //--- private properties ---
